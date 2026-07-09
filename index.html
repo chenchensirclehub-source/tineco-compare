@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tineco Product Compare</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;padding:1.5rem}
+h1{font-size:22px;font-weight:500;margin-bottom:4px}
+.sub{font-size:13px;color:#666;margin-bottom:1.25rem}
+.slots-wrap{display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap;align-items:flex-start}
+.slot{background:#ebebeb;border-radius:12px;padding:14px 16px;min-width:160px;flex:1}
+.slot-label{font-size:11px;color:#999;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.slot-label button{font-size:10px;background:none;border:none;color:#bbb;cursor:pointer;padding:0;line-height:1}
+.slot-label button:hover{color:#888}
+.slot select{width:100%;font-size:13px;font-weight:500;background:#fff;border:1px solid #ddd;border-radius:6px;color:#1a1a1a;outline:none;cursor:pointer;padding:5px 7px;margin-bottom:6px}
+.add-btn{background:#fff;border:1.5px dashed #ccc;border-radius:12px;padding:14px 16px;font-size:13px;color:#999;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;min-width:120px;white-space:nowrap;transition:border-color .15s,color .15s}
+.add-btn:hover{border-color:#888;color:#555}
+.output-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.compare-wrap{border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;background:#fff;min-width:500px}
+.compare-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.compare-table th,.compare-table td{padding:10px 12px;font-size:13px;vertical-align:middle;border-bottom:1px solid #f0f0f0}
+.compare-table tr:last-child td,.compare-table tr:last-child th{border-bottom:none}
+.col-feature{width:140px;min-width:140px;color:#666;font-size:12px;background:#fafafa;font-weight:400}
+.col-model{min-width:150px;text-align:center}
+.head-row th{background:#fafafa;padding:16px 12px;border-bottom:1px solid #e0e0e0}
+.model-head{font-size:13px;font-weight:500;color:#1a1a1a;line-height:1.4}
+.brand-head{font-size:11px;color:#999;margin-top:2px}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;margin-bottom:6px}
+.badge-0{background:#e8f0fe;color:#1a56db}
+.badge-1{background:#fef3c7;color:#92400e}
+.badge-2{background:#fce7f3;color:#9d174d}
+.badge-3{background:#d1fae5;color:#065f46}
+.section-row th{background:#f5f5f3;font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.05em;padding:6px 12px}
+.section-row td{background:#f5f5f3;padding:6px 12px}
+.val-yes{color:#15803d;font-size:16px;font-weight:500}
+.val-no{color:#dc2626;font-size:16px}
+.val-text{color:#1a1a1a;font-size:12px;line-height:1.4}
+.modes-cell{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}
+.mode-tag{font-size:10px;padding:2px 7px;border-radius:20px;background:#e8f0fe;color:#1a56db}
+.empty-state{text-align:center;padding:3rem;color:#aaa;font-size:13px}
+.hl{background:#f0fdf4}
+.warranty-th{color:#15803d;font-size:12px}
+.brand-tineco .model-head{color:#1a1a1a}
+.brand-dreame .model-head{color:#1a1a1a}
+.brand-roborock .model-head{color:#1a1a1a}
+@media(max-width:600px){body{padding:1rem}.slots-wrap{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<h1>Tineco Product Compare</h1>
+<p class="sub">Select up to 4 models to compare — mix any brand</p>
+
+<div class="slots-wrap" id="slotsWrap"></div>
+<div class="output-wrap"><div id="output"></div></div>
+
+<script>
+const BADGE_LABELS=['Model A','Model B','Model C','Model D'];
+
+const DATA={
+  "Floor One S6":{brand:"Tineco",models:{
+    "Switch S6 Power Kit":{suction:"25kPa",runtime:"40 (washer) / 65 (vacuum)",clean_tank:"0.8L",dirty_tank:"0.72L",steam:"❌",lay_flat:"180°",electrolyzed:"✅",edge:"Triple-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"One-Touch Self-Cleaning",silentdry:"❌",reverse_scrub:"❌",self_prop:"Front Assistance",modes:["Auto","Max"],extras:{"Special":"5-in-1 Multi-Function","Wheels":"Mini Assistive Wheels"}},
+    "S6 Stretch Max":{suction:"22kPa",runtime:"45 (Auto) / 60 (Quiet)",clean_tank:"0.8L",dirty_tank:"0.72L",steam:"❌",lay_flat:"180°",electrolyzed:"✅",edge:"Triple-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"85°C Full-Path FlashDry in 5 mins",silentdry:"✅",reverse_scrub:"❌",self_prop:"Front Assistance + HyperStretch",modes:["Auto","Max","Suction","Quiet"],extras:{"Anti-Odor Stick":"✅","Display":"Smart LED Display"}},
+    "S6 Stretch Steam":{suction:"22kPa",runtime:"Unlimited",clean_tank:"1.0L",dirty_tank:"0.72L",steam:"160°C HyperSteam",lay_flat:"180°",electrolyzed:"❌",edge:"Triple-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"Steam Self-Cleaning",silentdry:"❌",reverse_scrub:"❌",self_prop:"Front Assistance",modes:["Steam","Boost Steam","Auto","Suction"],extras:{"Reach":"8.3m Extended Reach","Light":"LED Headlight"}}
+  }},
+  "Floor One S7":{brand:"Tineco",models:{
+    "S7 Station Auto":{suction:"22kPa",runtime:"65",clean_tank:"1.0L",dirty_tank:"0.72L",steam:"❌",lay_flat:"180°",electrolyzed:"✅",edge:"Triple-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"Fully Automated Station Self-Cleaning",silentdry:"✅",reverse_scrub:"❌",self_prop:"Bi-Directional",modes:["Auto","Max","Suction","Quiet"],extras:{"Scraper":"StreakFree Scraper"}},
+    "S7 Fold Pro":{suction:"22kPa",runtime:"55 (Auto) / 70 (Quiet)",clean_tank:"0.6L",dirty_tank:"0.4L",steam:"❌",lay_flat:"3.78\" (≈9.6cm) Lay-Flat",electrolyzed:"✅",edge:"Triple-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"85°C Full-Path FlashDry in 5 mins",silentdry:"✅",reverse_scrub:"❌",self_prop:"Forward",modes:["Auto","Max","Suction","Quiet"],extras:{"Weight":"3.9kg","Scraper":"Smart-Sensing StreakFree Scraper","Voice":"Voice Assistant"}},
+    "S7 Stretch Steam":{suction:"25kPa",runtime:"80 (Auto) / 30 (Steam)",clean_tank:"0.88L",dirty_tank:"0.7L",steam:"160°C HyperSteam",lay_flat:"180°",electrolyzed:"❌",edge:"Triple-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"85°C Full-Path FlashDry in 5 mins",silentdry:"✅",reverse_scrub:"❌",self_prop:"Bi-Directional",modes:["Auto","Max","Suction","Steam"],extras:{"Brush":"Heat-Resistant Brush Roller","iLoop":"iLoop™ Technology"}},
+    "S7 Stretch Max":{suction:"22kPa",runtime:"50 (Auto) / 65 (Quiet)",clean_tank:"1.0L",dirty_tank:"0.69L",steam:"❌",lay_flat:"180°",electrolyzed:"✅",edge:"Triple-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"85°C Full-Path FlashDry in 5 mins",silentdry:"✅",reverse_scrub:"✅",self_prop:"Bi-Directional",modes:["Auto","Max","Suction","Quiet"],extras:{"Separation":"3-Chamber Dirty Water Separation","Display":"Thumb Screen","Backtrack":"Backtrack Water Erasure","Anti-Odor Stick":"✅"}}
+  }},
+  "Floor One S9":{brand:"Tineco",models:{
+    "S9 Artist Steam Pro":{suction:"25kPa",runtime:"90",clean_tank:"0.88L",dirty_tank:"0.8L",steam:"160°C HyperSteam",lay_flat:"180°",electrolyzed:"✅",edge:"Triple-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"85°C Full-Path FlashDry in 5 mins",silentdry:"✅",reverse_scrub:"✅",self_prop:"360° Omni-Directional",modes:["Auto","Max","Suction","Quiet","Steam"],extras:{"Stretch":"HyperStretch Technology","Display":"3D Light Display + Thumb Screen","Backtrack":"Backtrack Water Erasure"}}
+  }},
+  "iFloor i Series":{brand:"Tineco",models:{
+    "i7 Stretch Steam":{suction:"25kPa",runtime:"80 (Eco) / 30 (Steam)",clean_tank:"0.88L",dirty_tank:"0.7L",steam:"160°C HyperSteam",lay_flat:"—",electrolyzed:"❌",edge:"Triple-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"85°C Full-Path FlashDry in 5 mins",silentdry:"✅",reverse_scrub:"❌",self_prop:"Forward",modes:["Eco","Max","Steam"],extras:{"Brush":"Heat-Resistant Brush Roller","Display":"Smart LED Display"}},
+    "i7 Fold":{suction:"22kPa",runtime:"50 (Eco)",clean_tank:"0.7L",dirty_tank:"0.4L",steam:"❌",lay_flat:"3.78\" (≈9.6cm) Lay-Flat",electrolyzed:"❌",edge:"Dual-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"85°C Full-Path FlashDry in 5 mins",silentdry:"✅",reverse_scrub:"❌",self_prop:"Forward",modes:["Eco","Max","Quiet","Suction"],extras:{"Weight":"3.5kg","Voice":"Voice Assistant"}},
+    "i6 Stretch II":{suction:"20kPa",runtime:"45 (Eco) / 60 (Quiet)",clean_tank:"0.8L",dirty_tank:"0.72L",steam:"❌",lay_flat:"180°",electrolyzed:"❌",edge:"Dual-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"85°C Full-Path FlashDry in 5 mins",silentdry:"❌",reverse_scrub:"❌",self_prop:"Front Assistance",modes:["Eco","Max","Quiet"],extras:{}},
+    "i5 Stretch II":{suction:"20kPa",runtime:"30 (Eco) / 45 (Quiet)",clean_tank:"0.8L",dirty_tank:"0.72L",steam:"❌",lay_flat:"180°",electrolyzed:"❌",edge:"Dual-Sided",antitangle:"DualBlock Anti-Tangle",self_clean:"Normal",silentdry:"❌",reverse_scrub:"❌",self_prop:"Front Assistance",modes:["Eco","Max","Quiet"],extras:{}}
+  }},
+  "Y Series":{brand:"Tineco",models:{
+    "Y3 Stretch":{suction:"20kPa",runtime:"40",clean_tank:"1.0L",dirty_tank:"0.8L",steam:"❌",lay_flat:"180°",electrolyzed:"❌",edge:"Single-Sided",antitangle:"Anti-Tangle",self_clean:"85°C Full-Path FlashDry in 5 mins",silentdry:"❌",reverse_scrub:"❌",self_prop:"128° Swivel",modes:["Eco","Max"],extras:{"Separation":"Solid-Liquid Separation"}},
+    "Y2 Stretch":{suction:"11kPa",runtime:"30",clean_tank:"1.0L",dirty_tank:"0.8L",steam:"❌",lay_flat:"❌",electrolyzed:"❌",edge:"Single-Sided",antitangle:"Anti-Tangle",self_clean:"Normal",silentdry:"❌",reverse_scrub:"❌",self_prop:"—",modes:["Auto","Suction"],extras:{"Separation":"Solid-Liquid Separation"}}
+  }},
+  "Cordless Vacuum":{brand:"Tineco",models:{
+    "Pure One S30 Pro":{suction:"200AW",runtime:"65",clean_tank:"—",dirty_tank:"—",steam:"❌",lay_flat:"180° Foldable Tube",electrolyzed:"❌",edge:"—",antitangle:"ZeroTangle™",self_clean:"❌",silentdry:"❌",reverse_scrub:"❌",self_prop:"—",modes:["Eco","Med","Max"],extras:{"Filtration":"6-Stage","Dustbin":"0.6L","Dock":"Wall Mount"}},
+    "Pure One A50S Plus":{suction:"185AW",runtime:"70",clean_tank:"—",dirty_tank:"—",steam:"❌",lay_flat:"Foldable Tube",electrolyzed:"❌",edge:"—",antitangle:"ZeroTangle™",self_clean:"❌",silentdry:"❌",reverse_scrub:"❌",self_prop:"—",modes:["Eco","Auto","Max"],extras:{"Dustbin":"1L","Brush":"3DSense Brush","iLoop":"iLoop™ Dust Sensor","Display":"LED Display","Dock":"Wall Mount"}},
+    "Pure One Station 5":{suction:"175AW",runtime:"70",clean_tank:"—",dirty_tank:"—",steam:"❌",lay_flat:"—",electrolyzed:"❌",edge:"—",antitangle:"ZeroTangle™",self_clean:"❌",silentdry:"❌",reverse_scrub:"❌",self_prop:"—",modes:["Eco","Auto","Max"],extras:{"Dustbin":"0.45L","Station":"Self-Clean Station 2.5L","iLoop":"iLoop™ Dust Sensor"}},
+    "A30S":{suction:"160AW",runtime:"60",clean_tank:"—",dirty_tank:"—",steam:"❌",lay_flat:"—",electrolyzed:"❌",edge:"—",antitangle:"ZeroTangle™",self_clean:"❌",silentdry:"❌",reverse_scrub:"❌",self_prop:"—",modes:["Eco","Auto","Max"],extras:{"Dustbin":"1L","iLoop":"iLoop™ Dust Sensor","Filtration":"5-Stage","Dock":"Wall Mount"}},
+    "Go Mini Pet":{suction:"18AW",runtime:"20",clean_tank:"—",dirty_tank:"—",steam:"❌",lay_flat:"—",electrolyzed:"❌",edge:"—",antitangle:"❌",self_clean:"❌",silentdry:"❌",reverse_scrub:"❌",self_prop:"—",modes:["Eco","Max"],extras:{"Dustbin":"0.2L","iLoop":"iLoop™ Dust Sensor","Filtration":"HEPA","Design":"Ultra Lightweight 1.07kg"}}
+  }},
+  "Carpet Series":{brand:"Tineco",models:{
+    "iCarpet Spot":{suction:"45AW",runtime:"—",clean_tank:"0.8L",dirty_tank:"0.6L",steam:"❌",lay_flat:"—",electrolyzed:"❌",edge:"—",antitangle:"❌",self_clean:"❌",silentdry:"❌",reverse_scrub:"❌",self_prop:"—",modes:[],extras:{"Hose":"Rubber Hose","Weight":"3.7kg Compact"}},
+    "Carpet One Cruiser":{suction:"130AW",runtime:"—",clean_tank:"2.0L",dirty_tank:"1.7L",steam:"❌",lay_flat:"—",electrolyzed:"❌",edge:"—",antitangle:"❌",self_clean:"FlashDry",silentdry:"❌",reverse_scrub:"❌",self_prop:"3-level SmoothPower",modes:["Auto","Max","Drying"],extras:{"Cordless":"No (Corded)","Dry tech":"75°C DualCore PowerDry","System":"DrySense System"}}
+  }},
+  "Dreame":{brand:"Dreame",models:{
+    "H16 GT":{suction:"23,000Pa",runtime:"35 (Eco) / 20 (Standard)",clean_tank:"0.8L",dirty_tank:"0.7L",steam:"❌",lay_flat:"180°",electrolyzed:"❌",edge:"Triple-Edge",antitangle:"TangleCut™ 2.0",self_clean:"60°C Hot Wash + 95°C Hot Air Dry",silentdry:"❌",reverse_scrub:"❌",self_prop:"Front Assistance",modes:["Eco","Standard","Turbo"],extras:{}},
+    "H14 Ultra":{suction:"20,000Pa",runtime:"40",clean_tank:"0.88L",dirty_tank:"0.65L",steam:"❌",lay_flat:"180°",electrolyzed:"✅",edge:"Dual-Edge",antitangle:"TangleCut™",self_clean:"100°C Hot Wash + 75°C Hot Air Dry in 5 mins",silentdry:"❌",reverse_scrub:"❌",self_prop:"GlideWheel™ (Bi-Directional)",modes:["Auto","Ultra","Suction","Custom"],extras:{"Silver Ion":"Silver Ion Roller + Tank"}},
+    "H13 FlexReach":{suction:"21,000Pa",runtime:"50 (Quiet)",clean_tank:"0.78L",dirty_tank:"0.7L",steam:"❌",lay_flat:"180°",electrolyzed:"❌",edge:"Dual-Edge",antitangle:"TangleCut™",self_clean:"90°C Hot Wash + 90°C Hot Air Dry in 5 mins",silentdry:"❌",reverse_scrub:"❌",self_prop:"GlideWheel™ (Bi-Directional)",modes:["Smart","Turbo","Quiet","Suction"],extras:{"Anti-Odor":"7-Day Anti-Odor Tank"}},
+    "H16 Pro Steam":{suction:"28,000Pa",runtime:"72 (Quiet) / 20 (Steam)",clean_tank:"0.8L",dirty_tank:"0.6L",steam:"200°C SaunaClean™",lay_flat:"180°",electrolyzed:"❌",edge:"Triple-Edge (GapFree™ 2.0)",antitangle:"TangleCut™ 2.0",self_clean:"200°C Steam + 100°C Hot Wash + 90°C Super Speed Dry - 5 mins",silentdry:"❌",reverse_scrub:"❌",self_prop:"Bi-Directional",modes:["Smart","Hot Water","Steam","Scrubbing","Custom"],extras:{"AI Arm":"Dual-Arm AI DescendReach"}}
+  }},
+  "Roborock":{brand:"Roborock",models:{
+    "F25 ACE":{suction:"20,000Pa",runtime:"60 (Eco)",clean_tank:"0.74L",dirty_tank:"0.72L",steam:"❌",lay_flat:"12.5cm FlatReach™",electrolyzed:"❌",edge:"Triple-Edge (<1mm)",antitangle:"JawScrapers™",self_clean:"90°C Hot Wash + 90°C Hot Air Dry in 5 mins",silentdry:"❌",reverse_scrub:"❌",self_prop:"SlideTech 2.0",modes:["Auto","Max","Eco","Sponge"],extras:{"Dirt Detect":"DirTect™ Smart Sensor","Auto Detergent":"30-Day Auto Dispenser"}},
+    "F25 ACE Pro":{suction:"25,000Pa",runtime:"60 (Eco)",clean_tank:"1.0L",dirty_tank:"0.72L",steam:"❌",lay_flat:"12.5cm FlatReach™ 2.0",electrolyzed:"❌",edge:"Triple-Edge (0mm)",antitangle:"JawScrapers™",self_clean:"95°C Hot Wash + 95°C Hot Air Dry in 5 mins",silentdry:"❌",reverse_scrub:"❌",self_prop:"SlideTech 2.0",modes:["Auto","Max","Eco","Sponge"],extras:{"Foam":"JetFoaming™ (167M microbubbles)","Dirt Detect":"DirTect™ Smart Sensor","Auto Detergent":"30-Day Auto Dispenser"}},
+    "F25 Ultra":{suction:"22,000Pa",runtime:"60 (Eco)",clean_tank:"1.0L",dirty_tank:"0.72L",steam:"180°C VaporFlow™",lay_flat:"12.5cm FlatReach™ 2.0",electrolyzed:"❌",edge:"Triple-Edge (0mm)",antitangle:"JawScrapers™",self_clean:"180°C Steam + 90°C Hot Air Dry in 5 mins",silentdry:"❌",reverse_scrub:"❌",self_prop:"SlideTech 2.0",modes:["Auto","Hot Water","Steam","Sponge"],extras:{"Dirt Detect":"DirTect™ Smart Sensor","Auto Detergent":"30-Day Auto Dispenser","Blue Light":"Blue Light Illumination"}}
+  }}
+};
+
+const SERIES=Object.keys(DATA);
+const MAX_SLOTS=4;
+let slots=[{ser:'Floor One S7',model:'S7 Station Auto'},{ser:'Floor One S9',model:'S9 Artist Steam Pro'}];
+
+function getModelData(ser,model){return DATA[ser]&&DATA[ser].models[model]?DATA[ser].models[model]:null;}
+
+function buildSlotHTML(i){
+  const s=slots[i];
+  const serOpts=SERIES.map(sr=>`<option value="${sr}"${sr===s.ser?'selected':''}>${sr}</option>`).join('');
+  const models=DATA[s.ser]?Object.keys(DATA[s.ser].models):[];
+  const modOpts='<option value="">— select model —</option>'+models.map(m=>`<option value="${m}"${m===s.model?'selected':''}>${m}</option>`).join('');
+  const canRemove=slots.length>1;
+  return`<div class="slot" id="slot${i}">
+    <div class="slot-label"><span>${BADGE_LABELS[i]}</span>${canRemove?`<button onclick="removeSlot(${i})" title="Remove">✕</button>`:''}</div>
+    <select onchange="updateSlotSer(${i},this.value)">${serOpts}</select>
+    <select onchange="updateSlotModel(${i},this.value)">${modOpts}</select>
+  </div>`;
+}
+
+function renderSlots(){
+  const wrap=document.getElementById('slotsWrap');
+  let html=slots.map((_,i)=>buildSlotHTML(i)).join('');
+  if(slots.length<MAX_SLOTS) html+=`<button class="add-btn" onclick="addSlot()">＋ Add model</button>`;
+  wrap.innerHTML=html;
+}
+
+function addSlot(){
+  if(slots.length>=MAX_SLOTS)return;
+  slots.push({ser:'Dreame',model:'H16 Pro Steam'});
+  renderSlots();render();
+}
+
+function removeSlot(i){
+  if(slots.length<=1)return;
+  slots.splice(i,1);
+  renderSlots();render();
+}
+
+function updateSlotSer(i,ser){
+  slots[i].ser=ser;
+  const models=DATA[ser]?Object.keys(DATA[ser].models):[];
+  slots[i].model=models[0]||'';
+  renderSlots();render();
+}
+
+function updateSlotModel(i,model){
+  slots[i].model=model;
+  render();
+}
+
+function val(v){
+  if(v==='✅')return'<span class="val-yes">✓</span>';
+  if(v==='❌')return'<span class="val-no">✗</span>';
+  if(!v||v==='—')return'<span style="color:#bbb;font-size:12px">—</span>';
+  return'<span class="val-text">'+v+'</span>';
+}
+
+function numOf(s){
+  if(!s||s==='—'||s==='❌'||s==='✅')return null;
+  if(s.includes('/')||s.includes('('))return null;
+  const m=s.match(/(\d+(\.\d+)?)/);return m?parseFloat(m[1]):null;
+}
+
+function hlClass(vals,idx,hi){
+  const nums=vals.map(v=>numOf(v));
+  const valid=nums.filter(n=>n!==null);
+  if(valid.length<2)return'';
+  const best=hi?Math.max(...valid):Math.min(...valid);
+  return nums[idx]===best&&valid.filter(n=>n===best).length<valid.length?'hl':'';
+}
+
+function modesCell(d){
+  if(!d||!d.modes||!d.modes.length)return'<span style="color:#bbb;font-size:12px">—</span>';
+  return'<div class="modes-cell">'+d.modes.map(m=>'<span class="mode-tag">'+m+'</span>').join('')+'</div>';
+}
+
+function sec(label,cols){
+  return`<tr class="section-row"><th class="col-feature">${label}</th>${cols.map(()=>'<td></td>').join('')}</tr>`;
+}
+
+function row(label,dArr,key,hi=true){
+  const vals=dArr.map(d=>d?d[key]||'—':'—');
+  const cells=vals.map((v,i)=>`<td class="col-model ${hlClass(vals,i,hi)}">${dArr[i]?val(v):'<span style="color:#bbb">—</span>'}</td>`).join('');
+  return`<tr><th class="col-feature">${label}</th>${cells}</tr>`;
+}
+
+function brow(label,dArr,key){
+  const cells=dArr.map(d=>`<td class="col-model">${d?val(d[key]||'—'):'—'}</td>`).join('');
+  return`<tr><th class="col-feature">${label}</th>${cells}</tr>`;
+}
+
+function modesRow(dArr){
+  const cells=dArr.map(d=>`<td class="col-model">${modesCell(d)}</td>`).join('');
+  return`<tr><th class="col-feature">Cleaning modes</th>${cells}</tr>`;
+}
+
+function render(){
+  const out=document.getElementById('output');
+  const active=slots.map(s=>({ser:s.ser,model:s.model,data:getModelData(s.ser,s.model)}));
+  const hasAny=active.some(a=>a.model&&a.data);
+  if(!hasAny){out.innerHTML='<div class="empty-state">Select at least one model to compare</div>';return;}
+
+  const dArr=active.map(a=>a.data);
+  const n=active.length;
+
+  // Headers
+  const headCells=active.map((a,i)=>{
+    if(!a.model||!a.data)return`<th class="col-model"><span style="color:#bbb;font-size:13px">—</span></th>`;
+    const brand=DATA[a.ser]?DATA[a.ser].brand:'';
+    return`<th class="col-model brand-${brand.toLowerCase()}">
+      <div class="badge badge-${i}">${BADGE_LABELS[i]}</div>
+      <div class="model-head">${brand?brand+' ':''} ${a.model}</div>
+      <div class="brand-head">${a.ser}</div>
+    </th>`;
+  }).join('');
+
+  const cols=active.map(()=>null);
+
+  // Determine which sections to show
+  const isTinecoFloor=s=>["Floor One S6","Floor One S7","Floor One S9","iFloor i Series","Y Series"].includes(s);
+  const isDreame=s=>s==="Dreame";
+  const isRoborock=s=>s==="Roborock";
+  const showFloor=active.some(a=>isTinecoFloor(a.ser)||isDreame(a.ser)||isRoborock(a.ser));
+  const hasTanks=dArr.some(d=>d&&d.clean_tank&&d.clean_tank!=='—');
+
+  let body=sec("Performance",cols)+row("Suction power",dArr,"suction",true)+modesRow(dArr)+row("Runtime (mins)",dArr,"runtime",true);
+
+  if(showFloor){
+    body+=sec("Steam",cols)+brow("Steam cleaning",dArr,"steam");
+    body+=sec("Cleaning features",cols)+brow("Lay-flat design",dArr,"lay_flat")+brow("Electrolyzed water",dArr,"electrolyzed")+brow("Edge cleaning",dArr,"edge")+brow("Anti-tangle",dArr,"antitangle")+brow("ReverseScrub technology",dArr,"reverse_scrub");
+    body+=sec("Self-cleaning",cols)+brow("Self-clean system",dArr,"self_clean")+brow("SilentDry mode",dArr,"silentdry");
+    body+=sec("Maneuverability",cols)+brow("Swivel / propulsion",dArr,"self_prop");
+    if(hasTanks) body+=sec("Water tanks",cols)+row("Clean water tank",dArr,"clean_tank",true)+row("Dirty water tank",dArr,"dirty_tank",true);
+  }
+
+  // Extras — union of all keys across all models
+  const allExtraKeys=[...new Set(dArr.flatMap(d=>d?Object.keys(d.extras||{}):[])) ];
+  if(allExtraKeys.length){
+    body+=sec("Additional features",cols);
+    allExtraKeys.forEach(k=>{
+      const cells=dArr.map(d=>`<td class="col-model">${val(d?.extras?.[k]||'❌')}</td>`).join('');
+      body+=`<tr><th class="col-feature">${k}</th>${cells}</tr>`;
+    });
+  }
+
+  // Warranty row — Tineco models show 2-Year Local, competitors show —
+  const warrantyCells=active.map(a=>{
+    const isTineco=DATA[a.ser]&&DATA[a.ser].brand==='Tineco';
+    return`<td class="col-model">${isTineco&&a.data?'<span class="val-text">2-Year Local</span>':'<span style="color:#bbb;font-size:12px">—</span>'}</td>`;
+  }).join('');
+  body+=`<tr><th class="col-feature warranty-th">Warranty</th>${warrantyCells}</tr>`;
+
+  // Column widths: feature col fixed, model cols equal
+  const colW=`<col style="width:140px">` + active.map(()=>`<col style="min-width:150px">`).join('');
+
+  out.innerHTML=`<div class="compare-wrap"><table class="compare-table"><colgroup>${colW}</colgroup><thead><tr class="head-row"><th class="col-feature"></th>${headCells}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+renderSlots();
+render();
+</script>
+</body>
+</html>
